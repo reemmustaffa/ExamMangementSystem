@@ -1,0 +1,4 @@
+000-CCPP|Introduction to programming using C and C++|90|1000|700
+INT-WEB|HTML and CSS|60|1000|600
+PCEP|Certified Entry-Level Python|40|1000|700
+PCAP|Certified Associate Python|65|1000|800
