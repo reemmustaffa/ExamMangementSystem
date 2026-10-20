@@ -9,3 +9,9 @@ InvalidCredentialsException::InvalidCredentialsException() : ExamException("Inva
 
 FileException::FileException(string msg) : ExamException(msg) {
 }
+
+InvalidSelectionException::InvalidSelectionException() : ExamException("Invalid exam number.") {
+}
+
+ExamNotAvailableException::ExamNotAvailableException(string msg) : ExamException(msg) {
+}

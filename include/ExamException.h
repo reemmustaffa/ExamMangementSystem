@@ -18,4 +18,15 @@ class FileException : public ExamException {
     public:
     FileException(string msg);
 };
+
+class InvalidSelectionException : public ExamException {
+    public:
+    InvalidSelectionException();
+};
+
+class ExamNotAvailableException : public ExamException {
+    public:
+    ExamNotAvailableException(string msg);
+};
+
 #endif

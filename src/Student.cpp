@@ -35,10 +35,17 @@ static void printLine(string text){
     if(text.size()>W) text=text.substr(0,W);
     cout<<"|"<<left<<setw(W)<<text<<"|"<<endl;
 }
+
+static void printInfo(string label,string value){
+    stringstream ss;
+    ss<<" "<<left<<setw(15)<<label<<value;
+    printLine(ss.str());
+}
+
 void Student::viewReservations() {
-    map<string, Exam> exames;
     map<int,string>statutes;
     reservations.clear();
+    exames.clear();
     string line;
 
     ifstream examesfile("data/exams.txt");
@@ -144,6 +151,163 @@ void Student::viewReservations() {
      printLine("");
     cout << "╰" << repeatStr("─", W) << "╯" << endl;
 }
+
+bool Student::showExamDetails(string examCode){
+    map<string,Exam>::iterator it=exames.find(examCode);
+    if (it == exames.end()) {
+       throw ExamException("Unknown exam code: " + examCode);
+    }
+    Exam exam=it->second;
+
+    map<string,string> subjectNames;
+    map<string,string>sectionNames;
+
+    string line;
+
+    ifstream subjectsfile("data/subjects.txt");
+    if(!subjectsfile.is_open()){
+        throw FileException("Could not open subjects.txt");
+    }
+    while(getline(subjectsfile,line)){
+         if (line.empty()) continue;
+        stringstream ss(line);
+        string sub_code, sub_name, sub_hoursStr;
+        getline(ss, sub_code, '|');
+        getline(ss, sub_name, '|');
+        if(sub_code.empty() || sub_name.empty()){
+            throw FileException("Malformed record in subjects.txt: " + line);
+        }
+        subjectNames[sub_code] = sub_name;
+    }
+    subjectsfile.close();
+
+    ifstream sectionsfile("data/sections.txt");
+    if(!sectionsfile.is_open()){
+        throw FileException("Could not open sections.txt");
+    }
+    while(getline(sectionsfile,line)){
+        if (line.empty()) continue;
+        stringstream ss(line);
+        string sub_code, sec_code, sec_name;
+        getline(ss, sub_code, '|');
+        getline(ss, sec_code, '|');
+        getline(ss, sec_name, '|');
+        if(sub_code.empty() || sec_code.empty() || sec_name.empty()){
+            throw FileException("Malformed record in sections.txt: " + line);
+        }
+        sectionNames[sub_code + "|" + sec_code] = sec_name;
+    }
+    sectionsfile.close();
+
+    ifstream examDetailsfile("data/exam_details.txt");
+    if(!examDetailsfile.is_open()){
+        throw FileException("Could not open exam_details.txt");
+    }
+    while(getline(examDetailsfile,line)){
+        if (line.empty()) continue;
+        stringstream ss(line);
+        string exam_code, sub_code, sec_codeStr, no_quesStr;
+        getline(ss, exam_code, '|');
+        getline(ss, sub_code, '|');
+        getline(ss, sec_codeStr, '|');
+        getline(ss, no_quesStr, '|');
+
+        if(exam_code.empty() || sub_code.empty() || sec_codeStr.empty() || no_quesStr.empty()){
+            throw FileException("Malformed record in exam_details.txt: " + line);
+        }
+        exam.addDetail(ExamDetails(exam_code, sub_code, sec_codeStr, toInt(no_quesStr)));
+    }
+    examDetailsfile.close();
+
+    vector<ExamDetails> details = exam.getDetails();
+    if(details.empty()){
+        throw ExamNotAvailableException("No details found for this exam.");
+    }
+
+
+    // Display exam details
+     cout << endl;
+    cout << "╭" << repeatStr("─", W) << "╮" << endl;
+    printLine(" ");
+    printInfo("Exam Code:", exam.getExamCode());
+    printInfo("Exam Name:", exam.getExamName());
+    printInfo("Duration:", to_string(exam.getExamDuration()) + " minutes");
+    printInfo("Max Score:", to_string(exam.getMaxScore()));
+    printInfo("Pass Score:", to_string(exam.getPassScore()));
+
+    for (int i = 0; i < details.size(); i++) {
+        map<string, string>::iterator s = subjectNames.find(details[i].getSubCode());
+        if (s == subjectNames.end()) {
+            throw ExamException("Unknown subject code: " + details[i].getSubCode());
+        }
+        map<string, string>::iterator sec = sectionNames.find(details[i].getSubCode() + "|" + details[i].getSecCode());
+        if (sec == sectionNames.end()) {
+            throw ExamException("Unknown section code: " + details[i].getSecCode());
+        }
+        stringstream row;
+        row << "  " << left << setw(20) << s->second << setw(25) << sec->second << details[i].getNoQues();
+        printLine(row.str());
+    }
+    printLine("");
+    stringstream total;
+    total << "  " << left << setw(45) << "Total Number of Questions:" << exam.getTotalQuestions();
+    printLine(total.str());
+    printLine("");
+    printLine("  if you ready to start press 1 or q to quit :");
+    printLine("");
+    cout << "╰" << repeatStr("─", W) << "╯" << endl;
+
+
+    cout << "Your choice: ";
+    string input;
+    getline(cin, input);
+    if (input == "1") return true;
+    if (input == "q" || input == "Q") return false;
+    throw InvalidSelectionException();
+
+}
+
+void Student::selectExam(){
+    if(reservations.empty()){
+        throw ExamNotAvailableException("No exams available to select.");
+    }
+    string input;
+    cout << "Select an exam to start (enter the number): ";
+    getline(cin, input);
+     int choice;
+    try{
+       choice=stoi(input);
+    }
+     catch (exception& e) {
+        throw InvalidSelectionException();     
+    }
+     if(choice<1 || choice > reservations.size()){
+            throw InvalidSelectionException();
+    }
+    ExamReservation res=reservations[choice-1];
+    int status=res.getStatus();
+
+      if (status == 1) {
+        throw ExamNotAvailableException("This exam is reserved but not available yet.");
+    }
+    if (status == 4) {
+        throw ExamNotAvailableException("This exam is finished and cannot be reopened.");
+    }
+    if(status == 3) {
+        cout << "\nResuming your exam from question " << res.getCurQuestion() << "...\n";
+    }
+    if(status == 2) {
+        cout << "\nStarting your exam...\n";
+    }
+       bool ready = showExamDetails(res.getExamCode());
+    if (ready) {
+        startExam();
+    } else {
+        cout << "\nBye!\n";
+    }
+
+}
+
 
 void Student::startExam() {
     cout << "Start exam function\n";

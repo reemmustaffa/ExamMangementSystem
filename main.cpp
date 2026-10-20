@@ -11,13 +11,19 @@ int main() {
         student.login();
         cout << "\nLogin successful. Welcome " << student.getFirstName() << "!\n";
          student.viewReservations();
-        // student.startExam();
+         student.selectExam();
     }
     catch (InvalidCredentialsException& e) {
         cout << "\n" << e.what() << "\n";
     }
     catch (FileException& e) {
         cout << "\nFile error: " << e.what() << "\n";
+    }
+    catch (ExamNotAvailableException& e) {
+        cout << "\n" << e.what() << "\n";
+    }
+    catch (InvalidSelectionException& e) {
+        cout << "\n" << e.what() << "\n";
     }
     catch (exception& e) {
         cout << "\nError: " << e.what() << "\n";
