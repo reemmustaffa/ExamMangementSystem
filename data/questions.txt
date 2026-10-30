@@ -1,0 +1,20 @@
+00C|001|1|Which of the following comments about the ++ operator are correct?|1
+00C|001|2|Given b = 110 and c = 20, what is the value of 'a' after execution of the expression a = b = c *= 5?|1
+00C|002|3|Which statement can be used to make a branching?|2
+00C|001|4|What is the result of 7 / 2 in C when both operands are integers?|1
+00C|002|5|Which statement skips the rest of the current loop iteration and moves to the next one?|1
+00C|002|6|Which of the following are loop statements in C?|2
+00CPP|001|7|Which access specifier makes class members accessible only inside the class?|1
+00CPP|001|8|Which of the following support encapsulation in C++?|2
+00CPP|002|9|Which syntax correctly makes class Student inherit publicly from class User?|1
+00CPP|002|10|Which base class members are directly accessible inside a derived class (public inheritance)?|2
+PCEP|001|001|What is the output of print(2 ** 3)?
+PCEP|001|002|Which keyword is used to define a function in Python?
+PCEP|001|003|Which of the following are valid variable names in Python?
+PCEP|001|004|What is the type of the value 3.14?
+PCEP|001|005|Which symbol starts a single-line comment in Python?
+PCEP|002|006|Which of the following are Python loop statements?
+PCEP|002|007|What does len([1, 2, 3]) return?
+PCEP|002|008|Which of the following data types is immutable?
+PCEP|002|009|Which statements are used for decision making in Python?
+PCEP|002|010|What is the result of 7 // 2?
